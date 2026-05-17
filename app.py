@@ -6,7 +6,6 @@ import pandas as pd
 import numpy as np
 import joblib
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 # Konfigurasi halaman
 st.set_page_config(
@@ -16,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS untuk tampilan lebih menarik
+# Custom CSS
 st.markdown("""
 <style>
     .main-header {
@@ -120,6 +119,15 @@ with st.sidebar:
     3. Hasil prediksi akan muncul di sebelah kanan
     """)
 
+# Inisialisasi variabel untuk grafik
+engine_size = 2.5
+horsepower = 180
+fuel_efficiency = 25
+curb_weight = 3.0
+power_perf_factor = 70
+hitung = False
+predicted_price_k = 25
+
 # Layout 2 kolom
 col1, col2 = st.columns([1, 1], gap="large")
 
@@ -193,19 +201,54 @@ with col2:
         st.info("👈 Masukkan spesifikasi dan klik tombol HITUNG HARGA MOBIL")
 
 # Tab untuk informasi tambahan
-tab1, tab2 = st.tabs(["📈 Grafik Perbandingan", "ℹ️ Tentang Model"])
+tab1, tab2 = st.tabs(["📊 Grafik Perbandingan", "ℹ️ Tentang Model"])
 
 with tab1:
-    st.markdown("### Perbandingan dengan Mobil Populer")
+    st.markdown("### 📊 Perbandingan Spesifikasi dengan Mobil Populer")
     
+    # Data mobil populer
     popular_cars = {
-        'Mobil': ['Honda Civic', 'Toyota Camry', 'Ford Mustang', 'BMW 3 Series'],
-        'Engine (L)': [2.0, 2.5, 5.0, 2.0],
-        'HP': [158, 200, 450, 255],
-        'Price (K)': [22.5, 25.5, 55.0, 41.0]
+        'Mobil': ['Honda Civic', 'Toyota Camry', 'Ford Mustang', 'BMW 3 Series', 'Spesifikasi Anda'],
+        'Engine (L)': [2.0, 2.5, 5.0, 2.0, engine_size if hitung else 2.5],
+        'HP': [158, 200, 450, 255, horsepower if hitung else 180],
+        'MPG': [32, 28, 18, 26, fuel_efficiency if hitung else 25],
+        'Price (K)': [22.5, 25.5, 55.0, 41.0, predicted_price_k if hitung else 25]
     }
     df_compare = pd.DataFrame(popular_cars)
-    st.dataframe(df_compare, use_container_width=True)
+    
+    # Buat 3 grafik batang
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+    
+    # Warna khusus untuk bar "Spesifikasi Anda"
+    colors = ['#3498db', '#3498db', '#3498db', '#3498db', '#e74c3c']
+    
+    # Grafik 1: Engine Size
+    axes[0].bar(df_compare['Mobil'], df_compare['Engine (L)'], color=colors)
+    axes[0].set_ylabel('Engine Size (Liter)')
+    axes[0].set_title('Perbandingan Ukuran Mesin')
+    axes[0].tick_params(axis='x', rotation=45)
+    axes[0].set_ylim(0, 6)
+    
+    # Grafik 2: Horsepower
+    axes[1].bar(df_compare['Mobil'], df_compare['HP'], color=colors)
+    axes[1].set_ylabel('Horsepower (HP)')
+    axes[1].set_title('Perbandingan Tenaga Mesin')
+    axes[1].tick_params(axis='x', rotation=45)
+    axes[1].set_ylim(0, 500)
+    
+    # Grafik 3: Harga
+    axes[2].bar(df_compare['Mobil'], df_compare['Price (K)'], color=colors)
+    axes[2].set_ylabel('Harga (ribuan USD)')
+    axes[2].set_title('Perbandingan Harga')
+    axes[2].tick_params(axis='x', rotation=45)
+    axes[2].set_ylim(0, 60)
+    
+    plt.tight_layout()
+    st.pyplot(fig)
+    
+    # Tampilkan tabel sebagai tambahan
+    with st.expander("📋 Lihat Data dalam Bentuk Tabel"):
+        st.dataframe(df_compare, use_container_width=True)
 
 with tab2:
     st.markdown("""
@@ -222,6 +265,10 @@ with tab2:
     1. Power Performance Factor - Korelasi 0.90
     2. Horsepower - Korelasi 0.84
     3. Engine Size - Korelasi 0.75
+    
+    **Catatan Penggunaan:**
+    - Prediksi berdasarkan data historis penjualan di pasar AS
+    - Hasil bersifat estimasi, harga aktual dapat bervariasi
     """)
 
 # Footer
